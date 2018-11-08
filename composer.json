@@ -1,0 +1,12 @@
+{
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "require": {
+    "ext-pdo": "*",
+    "plasticbrain/php-flash-messages": "^1.0",
+    "php-di/php-di": "^6.0"
+  }
+}

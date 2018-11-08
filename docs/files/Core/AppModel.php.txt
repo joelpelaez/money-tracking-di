@@ -1,0 +1,27 @@
+<?php
+
+namespace App\Core;
+
+/**
+ * Class AppModel
+ *
+ * Clase base de los modelos. Solo incluye la conexión a la base de datos
+ * sin ningún método especial.
+ *
+ * @see Database
+ * @package App\Core
+ */
+class AppModel
+{
+    protected $_db;
+
+    /**
+     * AppModel constructor.
+     *
+     * Constructor por defecto, crea la instancia de Database.
+     */
+    public function __construct(){
+        $this->_db = new Database();
+    }
+}
+

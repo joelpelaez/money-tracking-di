@@ -1,0 +1,63 @@
+<?php
+/**
+ * @var \App\Core\View $this
+ */
+?>
+<div class="container">
+    <h2>Lista de Transacciones</h2>
+    <a class="btn" href="<?= APP_URL ?>transaction/add">Agregar Transacciones</a>
+    <button class="btn" onclick="$('.tap-target').tapTarget('open');">Ayuda!</button>
+    <table class="highlight responsive-table" border="1">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Descripción</th>
+            <th>Fecha</th>
+            <th>Monto</th>
+            <th>Categoría</th>
+            <th>Cuenta</th>
+            <th>Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($this->get('transactions') as $transaction): ?>
+            <tr>
+                <td><?= $this->e($transaction['id']) ?></td>
+                <td><?= $this->e($transaction['description']) ?></td>
+                <td><?= $this->e($transaction['date']) ?></td>
+                <td>$ <?= (number_format($transaction['amount'],2)) ?></td>
+                <td><?= $this->e($transaction['category']) ?></td>
+                <td><?= $this->e($transaction['account']) ?></td>
+
+                <td><a class="waves-effect waves-teal btn-flat"
+                       href="<?php echo APP_URL ?>transaction/edit/<?= $this->e($transaction['id']) ?>"><i class="material-icons ">edit</i></a>
+                    | <a class="waves-effect waves-teal btn-flat"
+                         href="<?php echo APP_URL ?>transaction/delete/<?= $this->e($transaction['id']) ?>"><i class="material-icons">delete</i></a>
+                </td>
+
+            </tr>
+
+        <?php endforeach ?>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Balance $<?= $this->e(number_format($this->get('balance'),2))?></td>
+            <td><p class="green-text">Ingresos $<?= $this->e(number_format($this->get('ingress'),2))?></p></td>
+            <td><p class="red-text">Egresos $<?= $this->e(number_format($this->get('egress'),2))?></p></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="fixed-action-btn">
+        <a id="floating" href="<?php echo APP_URL ?>transaction/add" class="btn-floating btn-large waves-effect waves-light red">
+            <i class="material-icons">add</i>
+        </a>
+    </div>
+
+    <div class="tap-target blue darken-2" data-target="floating">
+        <div class="tap-target-content">
+            <h5 class="white-text text-darken-2">Haz click para agregar Transacciones</h5>
+        </div>
+    </div>
+</div>

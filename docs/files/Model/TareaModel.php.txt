@@ -1,0 +1,136 @@
+<?php
+
+namespace App\Model;
+
+use \App\Core\AppModel;
+use \PDO;
+
+/**
+ * Class TareaModel
+ *
+ * Clase modelo de las tareas.
+ *
+ * @package App\Model
+ */
+class TareaModel extends AppModel
+{
+    public function __construct(){
+        parent::__construct();
+    }
+
+    /**
+     * Obtiene todas las tareas.
+     *
+     * Se hace una consulta donde regresa un array con todos los datos requeridos.
+     *
+     * @return array
+     */
+    public function getTareas(){
+        $tareas = $this->_db->query(
+            "SELECT tareas.*, categorias.nombre AS categoria FROM tareas INNER JOIN categorias".
+            " ON tareas.categoria_id = categorias.id"
+        );
+
+        return $tareas->fetchAll();
+    }
+
+    /**
+     * Agrega una nueva tarea
+     *
+     * @param array $datos Información de la nueva tarea.
+     *
+     * @return bool
+     */
+    public function add($datos = array()) {
+        $consulta = $this->_db->prepare(
+            "INSERT INTO tareas (nombre, descripcion, fecha, prioridad, categoria_id)".
+            "VALUES(:nombre, :descripcion, :fecha, :prioridad, :categoria_id)"
+        );
+        $consulta->bindParam(":nombre", $datos["nombre"], PDO::PARAM_STR);
+        $consulta->bindParam(":descripcion", $datos["descripcion"], PDO::PARAM_STR);
+        $consulta->bindParam(":fecha", $datos["fecha"]);
+        $consulta->bindParam(":prioridad", $datos["prioridad"]);
+        $consulta->bindParam(":categoria_id", $datos["categoria_id"]);
+
+        return $consulta->execute();
+    }
+
+    /**
+     * Actualiza los datos de una tarea.
+     *
+     * Actualiza cada uno de los campos del registro de la base de datos.
+     *
+     * @param array $datos Datos de la tarea actualizada.
+     * @return bool Es true si los datos se actualizaron de forma correcta.
+     */
+    public function update($datos = array()) {
+        $consulta = $this->_db->prepare(
+            "UPDATE tareas SET nombre = :nombre, descripcion = :descripcion,".
+            "fecha = :fecha, prioridad = :prioridad, categoria_id = :categoria_id WHERE id = :id"
+        );
+        $consulta->bindParam(":nombre", $datos["nombre"], PDO::PARAM_STR);
+        $consulta->bindParam(":descripcion", $datos["descripcion"], PDO::PARAM_STR);
+        $consulta->bindParam(":fecha", $datos["fecha"]);
+        $consulta->bindParam(":prioridad", $datos["prioridad"]);
+        $consulta->bindParam(":categoria_id", $datos["categoria_id"]);
+        $consulta->bindParam(":id", $datos['id']);
+
+        return $consulta->execute();
+    }
+
+    /**
+     * Obtener una tarea por su identificador.
+     *
+     * Obtiene un array asociativo con la información consultada.
+     *
+     * @param $id
+     * @return mixed
+     */
+    public function find($id) {
+        $tarea = $this->_db->prepare(
+            "SELECT * FROM tareas WHERE id = :id"
+        );
+        $tarea->bindParam("id", $id);
+        $tarea->execute();
+        return $tarea->fetch();
+    }
+
+    /**
+     * Elimina una tarea
+     *
+     * Elimina un registro de tarea de la base de datos. No es reversible.
+     *
+     * @param $id
+     * @return bool
+     */
+    public function delete($id) {
+        $tarea = $this->_db->prepare(
+            "DELETE FROM tareas WHERE id = :id"
+        );
+        $tarea->bindParam(":id", $id);
+
+        if ($tarea->execute()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Cambia el estado de una tarea.
+     *
+     * Permite alternar el estado de la tarea entre abierto o cerrado.
+     *
+     * @param $id
+     * @return bool
+     */
+    public function changeState($id) {
+        $consulta = $this->_db->prepare(
+            "UPDATE tareas SET status = 1 - status WHERE id = :id"
+        );
+        $consulta->bindParam(":id", $id);
+
+        return $consulta->execute();
+    }
+}
+

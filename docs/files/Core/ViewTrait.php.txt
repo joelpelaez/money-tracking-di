@@ -1,0 +1,23 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: joel
+ * Date: 06/11/2018
+ * Time: 01:18 PM
+ */
+
+namespace App\Core;
+
+
+trait ViewTrait
+{
+    /**
+     * Render the view. Used in controllers only.
+     * @param string $view View name
+     * @param array $data Associative array with object data.
+     */
+    public function render($view, $data = array()) {
+        $instance = new View();
+        $instance->renderPage($view, $data);
+    }
+}

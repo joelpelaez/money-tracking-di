@@ -1,0 +1,121 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: joel
+ * Date: 06/11/2018
+ * Time: 10:00 PM
+ */
+
+namespace App\Controller;
+
+
+use App\Core\AppController;
+use App\Core\View;
+use App\Model\AccountModel;
+use App\Model\CategoryModel;
+use App\Model\TransactionModel;
+
+/**
+ * Class TransactionController
+ * @package App\Controller
+ */
+class TransactionController extends AppController
+{
+    /**
+     * Modelo de transacciones.
+     * @var TransactionModel
+     */
+    protected $transactionModel;
+
+    /**
+     * Modelo de cuentas
+     * @var AccountModel
+     */
+    protected $accountModel;
+
+    /**
+     * Modelo de categorias
+     * @var CategoryModel
+     */
+    protected $categoryModel;
+
+    /**
+     * TransactionController constructor.
+     *
+     * Permite la inicialización del controlador con los modelos.
+     *
+     * @param TransactionModel $transactionModel
+     * @param AccountModel $accountModel
+     * @param CategoryModel $categoryModel
+     */
+    public function __construct(TransactionModel $transactionModel, AccountModel $accountModel, CategoryModel $categoryModel)
+    {
+        $this->transactionModel = $transactionModel;
+        $this->accountModel = $accountModel;
+        $this->categoryModel = $categoryModel;
+    }
+
+    /**
+     * Accion index
+     * @return mixed|void
+     */
+    public function index() {
+        $transactions = $this->transactionModel->findAll();
+        $egress = $ingress = 0.0;
+        foreach ($transactions as $transaction) {
+            if ($transaction['amount'] < 0)
+                $egress += $transaction['amount'];
+            else
+                $ingress += $transaction['amount'];
+        }
+        $balance = $ingress + $egress;
+        $this->render('transaction.index', ['transactions' => $transactions, 'ingress' => $ingress, 'egress' => $egress, 'balance' => $balance]);
+    }
+
+    /**
+     * Agrega una nueva transacción
+     */
+    public function add() {
+        if ($_POST) {
+            $this->transactionModel->add($_POST);
+            View::action('Se ha agregado una transacción');
+            $this->redirect(['controller' => 'transaction']);
+            return;
+        }
+
+        $categories = $this->categoryModel->findAll();
+        $accounts = $this->accountModel->findAll();
+        $this->render('transaction.add', ['categories' => $categories, 'accounts' => $accounts]);
+    }
+
+    /**
+     * Edita una transacción existente.
+     * @param $id
+     */
+    public function edit($id) {
+        if ($_POST) {
+            $data = $_POST;
+            $data['id'] = $id;
+            $this->transactionModel->update($data);
+            View::action('Se ha editado la transacción');
+            $this->redirect(['controller' => 'transaction']);
+            return;
+        }
+
+        $categories = $this->categoryModel->findAll();
+        $accounts = $this->accountModel->findAll();
+        $transaction = $this->transactionModel->find($id);
+
+        $this->render('transaction.edit', ['transaction' => $transaction, 'categories' => $categories, 'accounts' => $accounts]);
+    }
+
+    /**
+     * Elimina una transacción
+     * @param $id
+     */
+    public function delete($id) {
+        $this->transactionModel->delete($id);
+        View::action('Se ha eliminado la transacción');
+        $this->redirect(['controller' => 'transaction']);
+    }
+}

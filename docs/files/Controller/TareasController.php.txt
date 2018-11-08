@@ -1,0 +1,131 @@
+<?php
+
+namespace App\Controller;
+
+use \App\Core\AppController;
+use \App\Model\CategoriaModel;
+use \App\Model\TareaModel;
+
+/**
+ * Class TareasController
+ *
+ * Maneja las peticiones de modificación y consulta de las tareas.
+ *
+ * @package App\Controller
+ */
+class TareasController extends AppController
+{
+    public function __construct(){
+        parent::__construct();
+    }
+
+    public function index(){
+        /** @var TareaModel $tareas */
+        $tareas = $this->loadModel("tarea");
+        $this->_view->tareas = $tareas->getTareas();
+
+        $this->_view->title = "Página principal";
+        $this->_view->renderizar("index");
+    }
+
+    /**
+     * Permite agregar una tarea nueva.
+     *
+     * Permite la creación de una nueva tarea con la información requerida
+     * por el {@see TareaModel}
+     *
+     * @see \App\Model\TareaModel
+     * @throws \Exception
+     */
+    public function agregar() {
+        if ($_POST) {
+            /**
+             * @var TareaModel $tareas
+             */
+            $tareas = $this->loadModel("tarea");
+            $this->_view->tareas = $tareas->add($_POST);
+            $url = $this->redirect(['controller'=>'tareas']);
+
+            $this->_messages->success('Tarea agregada correctamente', $url);
+        }
+        /**
+         * @var CategoriaModel $categorias
+         */
+        $categorias = $this->loadModel("categoria");
+        $this->_view->categorias = $categorias->listarCategorias();
+        $this->_view->title = "Agregar";
+        $this->_view->renderizar("agregar");
+    }
+
+    /**
+     * Edita una tarea existente.
+     *
+     * Permite la edición de una tarea existente reescribiendo todos los datos
+     * que la tarea contiene por el contenido actulizado.
+     *
+     * @param int $id El identificador único de la tarea, solo es necesario en petición GET.
+     * @throws \Exception
+     */
+    public function editar($id = null) {
+        if ($_POST) {
+            /**
+             * @var TareaModel $tarea
+             */
+            $tarea = $this->loadModel("tarea");
+            $tarea->update($_POST);
+            $this->_view->flashMessage = "Datos guardados correctamente";
+            $this->redirect(["controller"=>"tareas"]);
+        }
+        $id = (int) $id;
+        /**
+         * @var TareaModel $tareas
+         */
+        $tareas = $this->loadModel("tarea");
+        /**
+         * @var CategoriaModel $categorias
+         */
+        $categorias = $this->loadModel("categoria");
+        $this->_view->tarea = $tareas->find($id);
+        $this->_view->categorias = $categorias->listarCategorias();
+        $this->_view->title = "Editar";
+        $this->_view->renderizar("editar");
+    }
+
+    /**
+     * Elimina una tarea.
+     *
+     * Permite eliminar una tarea del sistema. No realiza ninguna advertencia.
+     *
+     * @param int $id Identificador de la tarea.
+     */
+    public function eliminar($id) {
+        /**
+         * @var TareaModel $tarea
+         */
+        $tarea = $this->loadModel("tarea");
+        $registro = $tarea->find($id);
+
+        if (!empty($registro)) {
+            $tarea->delete($id);
+            $this->redirect(['controller' => 'tareas']);
+        }
+    }
+
+    /**
+     * Cambia el status de una tarea.
+     *
+     * Permite cambiar entre abierto y cerrado. No se define un estado
+     * fijo, solo realiza una alternación a bajo nivel.
+     *
+     * @param int $id Identificador de la tarea.
+     */
+    public function cambiarEstado($id) {
+        /**
+         * @var TareaModel $tareas
+         */
+        $tareas = $this->loadModel("tarea");
+        $tareas->changeState($id);
+        $this->redirect(['controller' => 'tareas']);
+    }
+}
+
